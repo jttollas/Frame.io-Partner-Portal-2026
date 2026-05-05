@@ -1317,7 +1317,7 @@
                 </button>
               ))}
               <button onClick={()=>{if(loggedIn){setShowDashboard(true);}else{setActiveSection('portal');}}}
-                style={{padding:'6px 14px',fontSize:13,fontWeight:600,border:'none',background:showDashboard||activeSection==='portal'?'var(--surface)':'none',color:showDashboard||activeSection==='portal'?'var(--accent)':'var(--accent)',cursor:'pointer',borderRadius:6,transition:'all 0.2s'}}}>
+                style={{padding:'6px 14px',fontSize:13,fontWeight:600,border:'none',background:showDashboard||activeSection==='portal'?'var(--surface)':'none',color:'var(--accent)',cursor:'pointer',borderRadius:6,transition:'all 0.2s'}}>
                 Partner Portal
               </button>
               <div style={{position:'relative'}}>
