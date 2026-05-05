@@ -1101,11 +1101,6 @@
                   <div>
                     <h3 style={{fontFamily:'DM Sans',fontWeight:700,fontSize:20,marginBottom:4}}>Create a new API Token</h3>
                     <p style={{color:'var(--muted)',fontSize:14,marginBottom:20}}>Generate tokens to access the Frame.io API.</p>
-                    <div style={{marginBottom:20}}>
-                      <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Description</label>
-                      <input value={tokenDescription} onChange={e=>setTokenDescription(e.target.value)} placeholder="My Awesome Token"
-                        style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
-                    </div>
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
                       <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em'}}>Scopes</label>
                       <button onClick={()=>{
@@ -1155,7 +1150,7 @@
                     <p style={{color:'var(--muted)',fontSize:14,marginBottom:24}}>Your Frame.io API token has been generated. Copy it now — you won't be able to see it again.</p>
                     <div style={{background:'var(--surface2)',borderRadius:10,padding:20,textAlign:'left',maxWidth:440,margin:'0 auto 16px'}}>
                       {[
-                        ['Description',tokenDescription||'My Awesome Token'],
+                        ['Name',newProject.name||'My Token'],
                         ['Token','fio_tok_'+Math.random().toString(36).slice(2,22)],
                         ['Scopes',Object.keys(tokenScopes).filter(k=>tokenScopes[k]).length+' permissions'],
                         ['Created',new Date().toISOString().split('T')[0]],
@@ -1172,7 +1167,14 @@
                     <div style={{background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.3)',borderRadius:8,padding:12,marginBottom:24,maxWidth:440,margin:'0 auto 24px'}}>
                       <p style={{fontSize:12,color:'var(--amber)',margin:0}}><strong>Important:</strong> Copy your token now. For security, it will not be shown again.</p>
                     </div>
-                    <Btn onClick={()=>setShowCreateProject(false)}>Done</Btn>
+                    <Btn onClick={()=>{
+                      const id='proj-'+Date.now();
+                      const projName = newProject.name.trim() || 'API Token';
+                      setProjects(prev=>[...prev,{id,name:projName,env:'Production',type:'platform',authType:'token',oauthType:'',clientId:'fio_tok_'+Math.random().toString(36).slice(2,14),clientSecret:'',redirectUri:'',redirectPattern:'',scopes:Object.keys(tokenScopes).filter(k=>tokenScopes[k]),createdAt:new Date().toISOString().split('T')[0]}]);
+                      setPlatformBreakdown(prev=>[...prev,{name:projName,projectId:id,apiCalls:0,assets:0,comments:0,shares:0,webhookDeliveries:0,errorRate:0,avgLatency:0}]);
+                      setDashIntegration([id]);
+                      setShowCreateProject(false);
+                    }}>View Dashboard</Btn>
                   </div>
                 )}
 
@@ -1314,22 +1316,25 @@
                   {label}
                 </button>
               ))}
+              <button onClick={()=>{if(loggedIn){setShowDashboard(true);}else{setActiveSection('portal');}}}
+                style={{padding:'6px 14px',fontSize:13,fontWeight:600,border:'none',background:showDashboard||activeSection==='portal'?'var(--surface)':'none',color:showDashboard||activeSection==='portal'?'var(--accent)':'var(--accent)',cursor:'pointer',borderRadius:6,transition:'all 0.2s'}}}>
+                Partner Portal
+              </button>
               <div style={{position:'relative'}}>
                 <button onClick={()=>setDevToolsOpen(devToolsOpen==='resources'?false:'resources')}
-                  style={{padding:'6px 14px',fontSize:13,fontWeight:500,border:'none',background:['partners','integrations','academy','portal'].includes(activeSection)?'var(--surface)':'none',
-                    color:['partners','integrations','academy','portal'].includes(activeSection)?'var(--text)':'var(--muted)',cursor:'pointer',borderRadius:6,display:'flex',alignItems:'center',gap:4}}>
+                  style={{padding:'6px 14px',fontSize:13,fontWeight:500,border:'none',background:['partners','integrations','academy'].includes(activeSection)?'var(--surface)':'none',
+                    color:['partners','integrations','academy'].includes(activeSection)?'var(--text)':'var(--muted)',cursor:'pointer',borderRadius:6,display:'flex',alignItems:'center',gap:4}}>
                   Resources <ChevronDown size={12}/>
                 </button>
                 {devToolsOpen==='resources' && (
                   <div style={{position:'absolute',top:'100%',left:0,marginTop:8,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:4,minWidth:200,boxShadow:'0 8px 32px rgba(0,0,0,0.5)',zIndex:60,animation:'slideDown 0.15s cubic-bezier(0.25, 1, 0.5, 1)'}}>
-                    {[['partners','Partner Program'],['integrations','Integrations'],['academy','Developer Academy'],['portal','Partner Portal'],['newsletter','Developer Newsletter']].map(([key,label]) => (
+                    {[['partners','Partner Program'],['integrations','Integrations'],['academy','Developer Academy'],['newsletter','Developer Newsletter']].map(([key,label]) => (
                       <button key={key} onClick={()=>{
-                        if(key==='portal' && loggedIn){setShowDashboard(true);}
-                        else if(key==='newsletter'){setNewsletterModal(true);}
+                        if(key==='newsletter'){setNewsletterModal(true);}
                         else {setActiveSection(key);}
                         setDevToolsOpen(false);
                       }}
-                        style={{display:'block',width:'100%',textAlign:'left',padding:'8px 12px',fontSize:13,background:activeSection===key?'var(--surface2)':'none',border:'none',color:key==='portal'?'var(--accent)':'var(--text)',borderRadius:6,cursor:'pointer',fontWeight:key==='portal'?600:400}}
+                        style={{display:'block',width:'100%',textAlign:'left',padding:'8px 12px',fontSize:13,background:activeSection===key?'var(--surface2)':'none',border:'none',color:'var(--text)',borderRadius:6,cursor:'pointer',fontWeight:400}}
                         onMouseEnter={e=>{ e.currentTarget.style.background='var(--surface2)'; }}
                         onMouseLeave={e=>{ e.currentTarget.style.background=activeSection===key?'var(--surface2)':'none'; }}>
                         {label}
