@@ -666,6 +666,9 @@
         setTokenScopes(prev=>({...prev,...updates}));
       };
       const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+      const [contextMenu, setContextMenu] = useState(null); // {x, y, id, name}
+      const [deleteModal, setDeleteModal] = useState(null); // {id, name}
+      const [deleteConfirmText, setDeleteConfirmText] = useState('');
       const dropdownRef = useRef(null);
       useEffect(() => {
         if (!projectDropdownOpen) return;
@@ -677,6 +680,23 @@
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
       }, [projectDropdownOpen]);
+
+      // Close context menu on any click
+      useEffect(() => {
+        if (!contextMenu) return;
+        const handler = () => setContextMenu(null);
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+      }, [contextMenu]);
+
+      const deleteIntegration = (id) => {
+        setPlatformBreakdown(prev => prev.filter(d => d.projectId !== id));
+        setProjects(prev => prev.filter(p => p.id !== id));
+        setDashIntegration('all');
+        setDeleteModal(null);
+        setDeleteConfirmText('');
+        setToast('Integration deleted');
+      };
       const [showSecret, setShowSecret] = useState(false);
       const [showC2CSecret, setShowC2CSecret] = useState(false);
       const [rotateModal, setRotateModal] = useState(false);
@@ -765,6 +785,7 @@
                       const checked = isSelected(item.id);
                       return (
                         <button key={item.id} onClick={()=>toggleIntegration(item.id)}
+                          onContextMenu={dashTab!=='c2c' ? (e)=>{e.preventDefault();setContextMenu({x:e.clientX,y:e.clientY,id:item.id,name:item.name});} : undefined}
                           style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'8px 12px',background:checked?'var(--surface2)':'none',border:'none',color:'var(--text)',borderRadius:6,cursor:'pointer',textAlign:'left',fontSize:13}}
                           onMouseEnter={e=>e.currentTarget.style.background='var(--surface2)'}
                           onMouseLeave={e=>e.currentTarget.style.background=checked?'var(--surface2)':'none'}>
@@ -1305,6 +1326,48 @@
                     <Btn onClick={()=>setShowC2CRequestModal(false)}>Done</Btn>
                   </div>
                 )}
+              </div>
+            </Modal>
+          )}
+
+          {/* Right-click context menu for platform integrations */}
+          {contextMenu && (
+            <div style={{position:'fixed',top:contextMenu.y,left:contextMenu.x,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,padding:4,boxShadow:'0 8px 32px rgba(0,0,0,0.5)',zIndex:300,minWidth:160}}
+              onMouseDown={e=>e.stopPropagation()}>
+              <button onClick={()=>{setDeleteModal({id:contextMenu.id,name:contextMenu.name});setContextMenu(null);setDeleteConfirmText('');}}
+                style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'8px 12px',background:'none',border:'none',color:'#ef4444',borderRadius:6,cursor:'pointer',textAlign:'left',fontSize:13,fontWeight:500}}
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(239,68,68,0.1)'}
+                onMouseLeave={e=>e.currentTarget.style.background='none'}>
+                <XIcon size={14}/> Delete Integration
+              </button>
+            </div>
+          )}
+
+          {/* Delete confirmation modal */}
+          {deleteModal && (
+            <Modal onClose={()=>{setDeleteModal(null);setDeleteConfirmText('');}} width={480}>
+              <div style={{padding:32}}>
+                <div style={{width:48,height:48,borderRadius:12,background:'rgba(239,68,68,0.1)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16}}>
+                  <AlertCircle size={24} color="#ef4444"/>
+                </div>
+                <h3 style={{fontFamily:'DM Sans',fontWeight:700,fontSize:20,margin:'0 0 8px'}}>Delete Integration</h3>
+                <p style={{color:'var(--muted)',fontSize:14,lineHeight:1.6,margin:'0 0 20px'}}>This will permanently remove <strong style={{color:'var(--text)'}}>{deleteModal.name}</strong> and all associated credentials. This action cannot be undone.</p>
+                <div style={{marginBottom:20}}>
+                  <label style={{fontSize:12,color:'var(--muted)',display:'block',marginBottom:6}}>Type <strong style={{color:'var(--text)'}}>{deleteModal.name}</strong> to confirm</label>
+                  <input value={deleteConfirmText} onChange={e=>setDeleteConfirmText(e.target.value)} placeholder={deleteModal.name}
+                    style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <Btn variant="ghost" onClick={()=>{setDeleteModal(null);setDeleteConfirmText('');}}>Cancel</Btn>
+                  <button onClick={()=>deleteIntegration(deleteModal.id)}
+                    disabled={deleteConfirmText!==deleteModal.name}
+                    style={{padding:'8px 20px',borderRadius:8,fontSize:13,fontWeight:600,border:'none',cursor:deleteConfirmText===deleteModal.name?'pointer':'not-allowed',
+                      background:deleteConfirmText===deleteModal.name?'#ef4444':'var(--surface2)',
+                      color:deleteConfirmText===deleteModal.name?'#fff':'var(--muted)',
+                      transition:'all 0.2s'}}>
+                    Delete Integration
+                  </button>
+                </div>
               </div>
             </Modal>
           )}
