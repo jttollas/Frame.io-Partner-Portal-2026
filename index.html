@@ -410,21 +410,21 @@
     const DEFAULT_PLATFORM_KPIS = ['total_users','api_calls','error_rate','avg_response','rate_limits','files_created','webhook_success'];
 
     const ALL_C2C_KPIS = [
-      {id:'c2c_accounts',label:'Total Accounts',getValue:()=>'12,631',getChange:()=>'▲ 9%',color:'var(--accent)'},
-      {id:'c2c_devices',label:'Devices Connected',getValue:()=>'22,800',getChange:()=>'▲ 14%',color:'var(--accent)'},
-      {id:'c2c_proj_devices',label:'Project Devices Active',getValue:()=>'38,041',getChange:()=>'▲ 11%',color:'var(--green)'},
-      {id:'c2c_projects',label:'Active Projects',getValue:()=>'24,475',getChange:()=>'▲ 7%',color:'var(--accent)'},
-      {id:'c2c_uploads_month',label:'Assets Uploaded Last Month',getValue:()=>'110,230',getChange:()=>'▲ 12%',color:'var(--green)'},
-      {id:'c2c_total_assets',label:'Total C2C Assets Ever',getValue:()=>'4,433,656',getChange:()=>'▲ 5%',color:'var(--accent)'},
-      {id:'c2c_success_uploads',label:'Successful Uploads Ever',getValue:()=>'4,140,069',getChange:()=>'▲ 5%',color:'var(--green)'},
-      {id:'c2c_success_rate',label:'Upload Success Rate',getValue:()=>'96.8%',getChange:()=>'▲ 0.3%',color:'var(--green)'},
+      {id:'c2c_accounts',label:'Total Accounts',getValue:s=>fmt(Math.round(12631*s)),getChange:()=>'▲ 9%',color:'var(--accent)'},
+      {id:'c2c_devices',label:'Devices Connected',getValue:s=>fmt(Math.round(22800*s)),getChange:()=>'▲ 14%',color:'var(--accent)'},
+      {id:'c2c_proj_devices',label:'Project Devices Active',getValue:s=>fmt(Math.round(38041*s)),getChange:()=>'▲ 11%',color:'var(--green)'},
+      {id:'c2c_projects',label:'Active Projects',getValue:s=>fmt(Math.round(24475*s)),getChange:()=>'▲ 7%',color:'var(--accent)'},
+      {id:'c2c_uploads_month',label:'Assets Uploaded Last Month',getValue:s=>fmt(Math.round(110230*s)),getChange:()=>'▲ 12%',color:'var(--green)'},
+      {id:'c2c_total_assets',label:'Total C2C Assets Ever',getValue:s=>fmt(Math.round(4433656*s)),getChange:()=>'▲ 5%',color:'var(--accent)'},
+      {id:'c2c_success_uploads',label:'Successful Uploads Ever',getValue:s=>fmt(Math.round(4140069*s)),getChange:()=>'▲ 5%',color:'var(--green)'},
+      {id:'c2c_success_rate',label:'Upload Success Rate',getValue:s=>(96.8-(s<1?0.4:0)+(s>3?0.2:0)).toFixed(1)+'%',getChange:()=>'▲ 0.3%',color:'var(--green)'},
       {id:'c2c_avg_filesize',label:'Avg Upload Size',getValue:()=>'1.2 GB',getChange:()=>'▲ 8%',color:'var(--accent)'},
-      {id:'c2c_runtime',label:'Total Runtime Hours',getValue:()=>fmt(158500),getChange:()=>'▲ 6%',color:'var(--accent)'},
-      {id:'c2c_storage',label:'Total Storage',getValue:()=>'72.7 TB',getChange:()=>'▲ 10%',color:'var(--accent)'},
-      {id:'c2c_lightroom',label:'Lightroom Assets',getValue:()=>fmt(1113000),getChange:()=>'▲ 13%',color:'var(--green)'},
-      {id:'c2c_upload_latency',label:'Avg Upload Latency',getValue:()=>'4.2s',getChange:()=>'▼ 0.8s',color:'var(--green)'},
-      {id:'c2c_lr_transfer_rate',label:'Lightroom Transfer Rate',getValue:()=>'98.1%',getChange:()=>'▲ 0.4%',color:'var(--green)'},
-      {id:'c2c_pairing_events',label:'Device Pairing Events',getValue:()=>fmt(3842),getChange:()=>'▲ 16%',color:'var(--accent)'},
+      {id:'c2c_runtime',label:'Total Runtime Hours',getValue:s=>fmt(Math.round(158500*s)),getChange:()=>'▲ 6%',color:'var(--accent)'},
+      {id:'c2c_storage',label:'Total Storage',getValue:s=>(72.7*s).toFixed(1)+' TB',getChange:()=>'▲ 10%',color:'var(--accent)'},
+      {id:'c2c_lightroom',label:'Lightroom Assets',getValue:s=>fmt(Math.round(1113000*s)),getChange:()=>'▲ 13%',color:'var(--green)'},
+      {id:'c2c_upload_latency',label:'Avg Upload Latency',getValue:s=>(4.2+(s<1?0.6:0)-(s>3?0.3:0)).toFixed(1)+'s',getChange:()=>'▼ 0.8s',color:'var(--green)'},
+      {id:'c2c_lr_transfer_rate',label:'Lightroom Transfer Rate',getValue:s=>(98.1-(s<1?0.5:0)+(s>3?0.1:0)).toFixed(1)+'%',getChange:()=>'▲ 0.4%',color:'var(--green)'},
+      {id:'c2c_pairing_events',label:'Device Pairing Events',getValue:s=>fmt(Math.round(3842*s)),getChange:()=>'▲ 16%',color:'var(--accent)'},
     ];
     const DEFAULT_C2C_KPIS = ['c2c_accounts','c2c_devices','c2c_proj_devices','c2c_projects','c2c_uploads_month','c2c_total_assets','c2c_success_uploads'];
 
@@ -860,6 +860,7 @@
               integration={selectedLabel}
               selectedIds={selectedIds}
               isAll={isAll}
+              dateRange={dateRange}
               showSecret={showC2CSecret} setShowSecret={setShowC2CSecret}
               rotateModal={c2cRotateModal} setRotateModal={setC2CRotateModal}
               setToast={setToast}
@@ -2173,12 +2174,16 @@
 
     // ─── PLATFORM DASHBOARD COMPONENT ────────────────────────────
 
+    const DATE_RANGE_MULT = {'7d':0.23,'30d':1,'90d':2.8,'12m':12};
+
     function PlatformDashboard({integration, selectedIds, isAll, dateRange, showSecret, setShowSecret, rotateModal, setRotateModal, errorFilter, setErrorFilter, filteredErrors, setToast, breakdownData}) {
       const METHOD_COLORS = {GET:'#3b82f6',POST:'#22c55e',PATCH:'#f59e0b',DELETE:'#ef4444'};
+      const drm = DATE_RANGE_MULT[dateRange] || 1;
       const selectedBreakdowns = !isAll ? breakdownData.filter(d => selectedIds.includes(d.projectId)) : breakdownData;
       const firstBreakdown = selectedBreakdowns[0] || null;
-      // Scale data per integration so each shows unique numbers
-      const scale = isAll ? 1.4 : selectedBreakdowns.length > 1 ? Math.max(0.01, selectedBreakdowns.reduce((a,d)=>a+d.apiCalls,0) / (2847000*breakdownData.length)*breakdownData.length) : firstBreakdown ? Math.max(0.01, firstBreakdown.apiCalls / 2847000) : 0.5;
+      // Scale data per integration so each shows unique numbers, then by date range
+      const baseScale = isAll ? 1.4 : selectedBreakdowns.length > 1 ? Math.max(0.01, selectedBreakdowns.reduce((a,d)=>a+d.apiCalls,0) / (2847000*breakdownData.length)*breakdownData.length) : firstBreakdown ? Math.max(0.01, firstBreakdown.apiCalls / 2847000) : 0.5;
+      const scale = baseScale * drm;
       const intLabel = integration;
 
       return (
@@ -2536,7 +2541,8 @@
 
     // ─── C2C DASHBOARD COMPONENT ─────────────────────────────────
 
-    function C2CDashboard({integration, selectedIds, isAll, showSecret, setShowSecret, rotateModal, setRotateModal, setToast, deviceData}) {
+    function C2CDashboard({integration, selectedIds, isAll, dateRange, showSecret, setShowSecret, rotateModal, setRotateModal, setToast, deviceData}) {
+      const drm = DATE_RANGE_MULT[dateRange] || 1;
       const [rotateReason, setRotateReason] = useState('');
       const intLabel = integration;
 
@@ -2551,7 +2557,7 @@
           </div>
 
           {/* Customizable C2C KPI Row */}
-          <KpiRow allMetrics={ALL_C2C_KPIS} defaultIds={DEFAULT_C2C_KPIS} scale={1}/>
+          <KpiRow allMetrics={ALL_C2C_KPIS} defaultIds={DEFAULT_C2C_KPIS} scale={drm}/>
 
           <p style={{fontSize:12,color:'var(--muted)',fontStyle:'italic'}}>Charts below capture accounts, devices, and projects that had an asset uploaded for the given month.</p>
 
