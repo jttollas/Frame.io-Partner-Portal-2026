@@ -762,23 +762,6 @@
                       );
                     })}
                     <div style={{borderTop:'1px solid var(--border)',margin:'4px 0'}}/>
-                    <button onClick={()=>{
-                      setProjectDropdownOpen(false);
-                      if (dashTab==='c2c') {
-                        setC2CRequestSubmitted(false);
-                        setC2CRequestForm({firstName:'Jeremy',lastName:'Tollas',company:'Adobe',email:'jtollas@adobe.com',integrationName:'',description:''});
-                        setShowC2CRequestModal(true);
-                      } else {
-                        setShowCreateProject(true);setCreateStep(1);setNewProject(p=>({...p,type:'platform',authType:'',name:''}));
-                      }
-                    }}
-                      style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'8px 12px',background:'none',border:'none',color:'var(--green)',borderRadius:6,cursor:'pointer',textAlign:'left',fontSize:13}}
-                      onMouseEnter={e=>e.currentTarget.style.background='var(--surface2)'}
-                      onMouseLeave={e=>e.currentTarget.style.background='none'}>
-                      <Plus size={14}/>
-                      <span style={{fontWeight:600}}>{dashTab==='c2c' ? 'Request New C2C Client Secret' : 'Register New Integration'}</span>
-                    </button>
-                    <div style={{borderTop:'1px solid var(--border)',margin:'4px 0'}}/>
                     <button onClick={()=>setProjectDropdownOpen(false)}
                       style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,width:'100%',padding:'8px 12px',background:'none',border:'none',color:'var(--accent)',borderRadius:6,cursor:'pointer',fontSize:13,fontWeight:600}}
                       onMouseEnter={e=>e.currentTarget.style.background='var(--surface2)'}
@@ -788,6 +771,21 @@
                   </div>
                 )}
               </div>
+              <button onClick={()=>{
+                if (dashTab==='c2c') {
+                  setC2CRequestSubmitted(false);
+                  setC2CRequestForm({firstName:'Jeremy',lastName:'Tollas',company:'Adobe',email:'jtollas@adobe.com',integrationName:'',description:''});
+                  setShowC2CRequestModal(true);
+                } else {
+                  setShowCreateProject(true);setCreateStep(1);setNewProject(p=>({...p,type:'platform',authType:'',apiChoice:'adc',name:''}));
+                }
+              }}
+                style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',background:'var(--green)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',transition:'all 0.2s'}}
+                onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
+                onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                <Plus size={13}/>
+                {dashTab==='c2c' ? 'Request C2C Secret' : 'Register Integration'}
+              </button>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
               <div style={{display:'flex',gap:2,background:'var(--surface)',borderRadius:8,border:'1px solid var(--border)',overflow:'hidden'}}>
