@@ -623,7 +623,31 @@
       const [dashIntegration, setDashIntegration] = useState('all'); // 'all' or array of selected IDs
       const [showCreateProject, setShowCreateProject] = useState(false);
       const [createStep, setCreateStep] = useState(1);
-      const [newProject, setNewProject] = useState({name:'',env:'Production',type:'platform',authType:'',oauthType:'webapp',redirectUri:'',redirectPattern:'',scopes:['openid','offline_access','email','profile','additional_info.roles']});
+      const [newProject, setNewProject] = useState({name:'',env:'Production',type:'platform',authType:'',apiChoice:'adc',oauthType:'webapp',redirectUri:'',redirectPattern:'',scopes:['openid','offline_access','email','profile','additional_info.roles']});
+      const [tokenDescription, setTokenDescription] = useState('');
+      const [tokenScopes, setTokenScopes] = useState({});
+      const TOKEN_SCOPE_GROUPS = [
+        {name:'Accounts',actions:['Read']},
+        {name:'Teams',actions:['Create','Read','Update']},
+        {name:'Projects',actions:['Create','Read','Update','Delete']},
+        {name:'Assets',actions:['Create','Read','Update','Delete']},
+        {name:'Comments',actions:['Create','Read','Update','Delete']},
+        {name:'Review Links',actions:['Create','Read','Update','Delete']},
+        {name:'Webhooks',actions:['Create','Read','Update','Delete']},
+        {name:'Custom Actions',actions:['Create','Read','Update','Delete']},
+        {name:'Audit Logs',actions:['Read']},
+        {name:'Presentations',actions:['Create','Read','Update','Delete']},
+      ];
+      const toggleTokenScope = (group,action) => {
+        const key = group+'.'+action;
+        setTokenScopes(prev=>({...prev,[key]:!prev[key]}));
+      };
+      const selectAllScopes = (group,actions) => {
+        const allSelected = actions.every(a=>tokenScopes[group+'.'+a]);
+        const updates = {};
+        actions.forEach(a=>{updates[group+'.'+a]=!allSelected;});
+        setTokenScopes(prev=>({...prev,...updates}));
+      };
       const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
       const dropdownRef = useRef(null);
       useEffect(() => {
@@ -836,7 +860,7 @@
               <div style={{padding:32}}>
                 {/* Step indicator */}
                 <div style={{display:'flex',alignItems:'center',gap:4,marginBottom:24}}>
-                  {(newProject.authType==='s2s'?[1,2,3,4,6]:[1,2,3,4,5,6]).map((s,idx,arr) => (
+                  {(newProject.apiChoice==='token'?[1,2,7,8]:newProject.authType==='s2s'?[1,2,3,4,6]:[1,2,3,4,5,6]).map((s,idx,arr) => (
                     <Fragment key={s}>
                       <div style={{width:28,height:28,borderRadius:99,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,transition:'all 0.2s',
                         background:createStep>=s?'var(--accent)':'var(--surface2)',color:createStep>=s?'#fff':'var(--muted)'}}>
@@ -869,17 +893,33 @@
                   <div>
                     <h3 style={{fontFamily:'DM Sans',fontWeight:700,fontSize:20,marginBottom:8}}>Add an API</h3>
                     <p style={{color:'var(--muted)',fontSize:14,marginBottom:24}}>Select the API you want to add to your project.</p>
-                    <div style={{border:'2px solid var(--accent)',borderRadius:12,padding:20,display:'flex',alignItems:'center',gap:16,background:'rgba(59,130,246,0.05)'}}>
-                      <div style={{width:48,height:48,borderRadius:10,background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                        <span style={{fontSize:20,fontWeight:800,letterSpacing:-1}}>)))</span>
+                    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                      <div onClick={()=>setNewProject({...newProject,apiChoice:'adc'})}
+                        style={{border:newProject.apiChoice==='adc'?'2px solid var(--accent)':'1px solid var(--border)',borderRadius:12,padding:20,display:'flex',alignItems:'center',gap:16,cursor:'pointer',background:newProject.apiChoice==='adc'?'rgba(59,130,246,0.05)':'var(--surface)',transition:'all 0.2s'}}>
+                        <div style={{width:48,height:48,borderRadius:10,background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                          <span style={{fontSize:20,fontWeight:800,letterSpacing:-1}}>)))</span>
+                        </div>
+                        <div style={{flex:1}}>
+                          <div style={{fontWeight:600,fontSize:16}}>Frame.io API <span style={{fontWeight:400,fontSize:13,color:'var(--muted)'}}>(via Adobe Developer Console)</span></div>
+                          <a style={{fontSize:13,color:'var(--accent)'}}>View Docs</a>
+                        </div>
+                        {newProject.apiChoice==='adc' && <CheckCircle2 size={22} color="var(--green)"/>}
                       </div>
-                      <div style={{flex:1}}>
-                        <div style={{fontWeight:600,fontSize:16}}>Frame.io API</div>
-                        <a style={{fontSize:13,color:'var(--accent)'}}>View Docs</a>
+                      {newProject.apiChoice==='adc' && <p style={{fontSize:12,color:'var(--muted)',margin:'0 0 4px',paddingLeft:4}}>The Frame.io API provides access to assets, projects, comments, webhooks, custom actions, and metadata.</p>}
+
+                      <div onClick={()=>setNewProject({...newProject,apiChoice:'token'})}
+                        style={{border:newProject.apiChoice==='token'?'2px solid var(--accent)':'1px solid var(--border)',borderRadius:12,padding:20,display:'flex',alignItems:'center',gap:16,cursor:'pointer',background:newProject.apiChoice==='token'?'rgba(59,130,246,0.05)':'var(--surface)',transition:'all 0.2s'}}>
+                        <div style={{width:48,height:48,borderRadius:10,background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                          <Key size={22} color="var(--accent)"/>
+                        </div>
+                        <div style={{flex:1}}>
+                          <div style={{fontWeight:600,fontSize:16}}>Create Frame.io V4 Token</div>
+                          <a style={{fontSize:13,color:'var(--accent)'}}>View Docs</a>
+                        </div>
+                        {newProject.apiChoice==='token' && <CheckCircle2 size={22} color="var(--green)"/>}
                       </div>
-                      <CheckCircle2 size={22} color="var(--green)"/>
+                      {newProject.apiChoice==='token' && <p style={{fontSize:12,color:'var(--muted)',margin:'0 0 4px',paddingLeft:4}}>Frame.io supports external access through scoped API tokens. Tokens are associated with individual user accounts, and have the same access permissions as the user who created them. All API actions in Frame.io are restricted by scopes.</p>}
                     </div>
-                    <p style={{fontSize:12,color:'var(--muted)',marginTop:12}}>The Frame.io API provides access to assets, projects, comments, webhooks, custom actions, and metadata.</p>
                   </div>
                 )}
 
@@ -1056,16 +1096,98 @@
                   </div>
                 )}
 
+                {/* Step 7: Token Scopes */}
+                {createStep===7 && (
+                  <div>
+                    <h3 style={{fontFamily:'DM Sans',fontWeight:700,fontSize:20,marginBottom:4}}>Create a new API Token</h3>
+                    <p style={{color:'var(--muted)',fontSize:14,marginBottom:20}}>Generate tokens to access the Frame.io API.</p>
+                    <div style={{marginBottom:20}}>
+                      <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Description</label>
+                      <input value={tokenDescription} onChange={e=>setTokenDescription(e.target.value)} placeholder="My Awesome Token"
+                        style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+                      <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em'}}>Scopes</label>
+                      <button onClick={()=>{
+                        const allKeys = TOKEN_SCOPE_GROUPS.flatMap(g=>g.actions.map(a=>g.name+'.'+a));
+                        const allSelected = allKeys.every(k=>tokenScopes[k]);
+                        const updates = {};
+                        allKeys.forEach(k=>{updates[k]=!allSelected;});
+                        setTokenScopes(updates);
+                      }} style={{background:'none',border:'none',color:'var(--accent)',fontSize:12,cursor:'pointer',fontWeight:600}}>Select all scopes</button>
+                    </div>
+                    <div style={{maxHeight:340,overflowY:'auto',border:'1px solid var(--border)',borderRadius:8,padding:'0 16px'}}>
+                      {TOKEN_SCOPE_GROUPS.map(group => (
+                        <div key={group.name} style={{borderBottom:'1px solid var(--border)',padding:'12px 0'}}>
+                          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:group.actions.length>1?8:0}}>
+                            <span style={{fontWeight:600,fontSize:13}}>{group.name}</span>
+                            {group.actions.length>1 && <button onClick={()=>selectAllScopes(group.name,group.actions)} style={{background:'none',border:'none',color:'var(--accent)',fontSize:11,cursor:'pointer'}}>Select all</button>}
+                          </div>
+                          {group.actions.map(action => (
+                            <div key={action} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'4px 0 4px 12px'}}>
+                              <span style={{fontSize:13,color:'var(--muted)'}}>{action}</span>
+                              <div onClick={()=>toggleTokenScope(group.name,action)}
+                                style={{width:16,height:16,borderRadius:3,border:tokenScopes[group.name+'.'+action]?'none':'1.5px solid var(--border)',background:tokenScopes[group.name+'.'+action]?'var(--accent)':'transparent',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                                {tokenScopes[group.name+'.'+action] && <Check size={10} color="#fff"/>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {createStep===7 && (
+                  <div style={{display:'flex',justifyContent:'space-between',marginTop:20}}>
+                    <Btn variant="ghost" onClick={()=>setCreateStep(2)}>Back</Btn>
+                    <Btn disabled={Object.keys(tokenScopes).filter(k=>tokenScopes[k]).length===0} onClick={()=>setCreateStep(8)}>Submit</Btn>
+                  </div>
+                )}
+
+                {/* Step 8: Token Created */}
+                {createStep===8 && (
+                  <div style={{textAlign:'center'}}>
+                    <div style={{width:56,height:56,borderRadius:99,background:'rgba(34,197,94,0.15)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+                      <CheckCircle size={28} style={{color:'var(--green)'}}/>
+                    </div>
+                    <h3 style={{fontFamily:'DM Serif Display',fontSize:22,margin:'0 0 8px'}}>Token Created!</h3>
+                    <p style={{color:'var(--muted)',fontSize:14,marginBottom:24}}>Your Frame.io API token has been generated. Copy it now — you won't be able to see it again.</p>
+                    <div style={{background:'var(--surface2)',borderRadius:10,padding:20,textAlign:'left',maxWidth:440,margin:'0 auto 16px'}}>
+                      {[
+                        ['Description',tokenDescription||'My Awesome Token'],
+                        ['Token','fio_tok_'+Math.random().toString(36).slice(2,22)],
+                        ['Scopes',Object.keys(tokenScopes).filter(k=>tokenScopes[k]).length+' permissions'],
+                        ['Created',new Date().toISOString().split('T')[0]],
+                      ].map(([k,v])=>(
+                        <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                          <span style={{color:'var(--muted)',fontSize:13}}>{k}</span>
+                          <div style={{display:'flex',alignItems:'center',gap:6}}>
+                            <span style={{fontSize:13,fontWeight:500,fontFamily:k==='Token'?'monospace':'inherit',maxWidth:240,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v}</span>
+                            {k==='Token' && <button onClick={()=>setToast('Token copied to clipboard')} style={{background:'none',border:'none',cursor:'pointer',color:'var(--muted)',padding:2}}><Copy size={14}/></button>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.3)',borderRadius:8,padding:12,marginBottom:24,maxWidth:440,margin:'0 auto 24px'}}>
+                      <p style={{fontSize:12,color:'var(--amber)',margin:0}}><strong>Important:</strong> Copy your token now. For security, it will not be shown again.</p>
+                    </div>
+                    <Btn onClick={()=>setShowCreateProject(false)}>Done</Btn>
+                  </div>
+                )}
+
                 {/* Navigation buttons */}
-                {createStep<6 && (
+                {createStep<6 && createStep!==7 && createStep!==8 && (
                   <div style={{display:'flex',justifyContent:'space-between',marginTop:28}}>
                     <Btn variant="ghost" onClick={()=>{
                       if(createStep===1) setShowCreateProject(false);
+                      else if(createStep===7) setCreateStep(2);
                       else if(createStep===5 && newProject.authType==='user') setCreateStep(4);
                       else setCreateStep(createStep-1);
                     }}>{createStep===1?'Cancel':'Back'}</Btn>
                     <Btn onClick={()=>{
-                      if(createStep===4 && newProject.authType==='s2s') setCreateStep(6);
+                      if(createStep===2 && newProject.apiChoice==='token') setCreateStep(7);
+                      else if(createStep===4 && newProject.authType==='s2s') setCreateStep(6);
                       else if(createStep===4 && newProject.authType==='user') setCreateStep(5);
                       else setCreateStep(createStep+1);
                     }} disabled={
