@@ -1395,10 +1395,6 @@
                   {label}
                 </button>
               ))}
-              <button onClick={()=>{if(loggedIn){setShowDashboard(true);}else{setActiveSection('portal');}}}
-                style={{padding:'6px 14px',fontSize:13,fontWeight:600,border:'none',background:showDashboard||activeSection==='portal'?'var(--surface)':'none',color:'var(--accent)',cursor:'pointer',borderRadius:6,transition:'all 0.2s'}}>
-                Partner Portal
-              </button>
               <div style={{position:'relative'}}>
                 <button onClick={()=>setDevToolsOpen(devToolsOpen==='resources'?false:'resources')}
                   style={{padding:'6px 14px',fontSize:13,fontWeight:500,border:'none',background:['partners','integrations','academy'].includes(activeSection)?'var(--surface)':'none',
@@ -1423,6 +1419,10 @@
                   </div>
                 )}
               </div>
+              <button onClick={()=>{if(loggedIn){setShowDashboard(true);}else{setActiveSection('portal');}}}
+                style={{padding:'6px 14px',fontSize:13,fontWeight:600,border:'none',background:showDashboard||activeSection==='portal'?'var(--surface)':'none',color:'var(--accent)',cursor:'pointer',borderRadius:6,transition:'all 0.2s'}}>
+                Partner Portal
+              </button>
             </div>
 
             <div style={{display:'flex',alignItems:'center',gap:12}}>
