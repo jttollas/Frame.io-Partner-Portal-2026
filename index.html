@@ -165,14 +165,30 @@
     ];
 
     const VIDEOS = [
-      { title: "Getting Started with Frame.io V4 API", duration: "12:34", level: "Beginner" },
-      { title: "Implementing Webhooks for Real-Time Events", duration: "18:22", level: "Intermediate" },
-      { title: "Building a DAM Integration with Frame.io", duration: "24:11", level: "Intermediate" },
-      { title: "Camera to Cloud: Device Authentication Flow", duration: "15:45", level: "Beginner" },
-      { title: "Custom Actions and Metadata Fields", duration: "31:08", level: "Advanced" },
-      { title: "OAuth 2.0 with the Frame.io Platform API", duration: "22:17", level: "Intermediate" },
-      { title: "Migrating from V2 to V4: Step by Step", duration: "28:44", level: "Intermediate" },
-      { title: "Building a Notification Integration", duration: "19:30", level: "Beginner" },
+      { title: "Getting Started with Frame.io V4 API", duration: "12:34", level: "Beginner",
+        desc: "Learn the fundamentals of the Frame.io V4 API — setting up your first project in Adobe Developer Console, making authenticated requests, and navigating the core resource model (accounts, teams, projects, assets). By the end, you'll have a working script that uploads a file and creates a review link.",
+        thumb: {bg:'linear-gradient(135deg,#1a2744,#0d1117)',icon:'Code2',accent:'#3b82f6',label:'v4'} },
+      { title: "Implementing Webhooks for Real-Time Events", duration: "18:22", level: "Intermediate",
+        desc: "Set up webhook endpoints to receive real-time notifications for asset uploads, comment activity, review link opens, and project changes. Covers webhook signing, retry logic, payload structure, and best practices for reliable event-driven architectures.",
+        thumb: {bg:'linear-gradient(135deg,#1a3a2a,#0d1117)',icon:'Zap',accent:'#22c55e',label:'Events'} },
+      { title: "Building a DAM Integration with Frame.io", duration: "24:11", level: "Intermediate",
+        desc: "Walk through building a complete Digital Asset Management connector — syncing assets between Frame.io and your DAM, handling version stacks, mapping metadata fields, and managing bidirectional updates. Includes architecture patterns for production deployments.",
+        thumb: {bg:'linear-gradient(135deg,#2a1a44,#0d1117)',icon:'Building2',accent:'#8b5cf6',label:'DAM'} },
+      { title: "Camera to Cloud: Device Authentication Flow", duration: "15:45", level: "Beginner",
+        desc: "Understand the C2C device authorization flow end-to-end — from device registration and pairing codes to OAuth token exchange and upload session creation. Demonstrates the full handshake using a simulated camera device.",
+        thumb: {bg:'linear-gradient(135deg,#0d2a3a,#0d1117)',icon:'Camera',accent:'#0bc5ea',label:'C2C'} },
+      { title: "Custom Actions and Metadata Fields", duration: "31:08", level: "Advanced",
+        desc: "Deep dive into extending Frame.io with custom actions that appear in the user's context menu, plus creating and querying custom metadata fields on assets. Covers action registration, callback handling, UI integration, and metadata search.",
+        thumb: {bg:'linear-gradient(135deg,#3a1a1a,#0d1117)',icon:'Sparkles',accent:'#ef4444',label:'Actions'} },
+      { title: "OAuth 2.0 with the Frame.io Platform API", duration: "22:17", level: "Intermediate",
+        desc: "Complete guide to OAuth 2.0 integration — authorization code flow, PKCE for public clients, token refresh, scope management, and server-to-server credentials. Includes code samples for Node.js and Python.",
+        thumb: {bg:'linear-gradient(135deg,#1a2744,#1a1a2e)',icon:'Shield',accent:'#f59e0b',label:'OAuth'} },
+      { title: "Migrating from V2 to V4: Step by Step", duration: "28:44", level: "Intermediate",
+        desc: "Practical migration guide from Frame.io V2 API to V4 — endpoint mapping, authentication changes, new resource model, breaking changes, and a recommended phased migration strategy with rollback points.",
+        thumb: {bg:'linear-gradient(135deg,#2a2a1a,#0d1117)',icon:'ChevronsRight',accent:'#f97316',label:'V2→V4'} },
+      { title: "Building a Notification Integration", duration: "19:30", level: "Beginner",
+        desc: "Build a Slack/Teams notification bot that alerts your team when reviews are ready, comments are posted, or assets are approved. Covers webhook setup, message formatting, and filtering events by project or user.",
+        thumb: {bg:'linear-gradient(135deg,#1a1a3a,#0d1117)',icon:'MessageSquare',accent:'#6366f1',label:'Notify'} },
     ];
 
     const BLOG_POSTS = [
@@ -608,6 +624,7 @@
 
       // Academy
       const [academyTab, setAcademyTab] = useState('videos');
+      const [videoModal, setVideoModal] = useState(null);
 
       // FAQ
       const [faqTab, setFaqTab] = useState('general');
@@ -1326,9 +1343,10 @@
                 </button>
                 {devToolsOpen==='resources' && (
                   <div style={{position:'absolute',top:'100%',left:0,marginTop:8,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:4,minWidth:200,boxShadow:'0 8px 32px rgba(0,0,0,0.5)',zIndex:60,animation:'slideDown 0.15s cubic-bezier(0.25, 1, 0.5, 1)'}}>
-                    {[['partners','Partner Program'],['integrations','Integrations'],['academy','Developer Academy'],['newsletter','Developer Newsletter']].map(([key,label]) => (
+                    {[['partners','Partner Program'],['integrations','Integrations'],['academy','Developer Academy'],['newsletter','Developer Newsletter'],['kb','Knowledge Base']].map(([key,label]) => (
                       <button key={key} onClick={()=>{
-                        if(key==='newsletter'){setNewsletterModal(true);}
+                        if(key==='kb'){window.open('https://help.frame.io/en/','_blank');}
+                        else if(key==='newsletter'){setNewsletterModal(true);}
                         else {setActiveSection(key);}
                         setDevToolsOpen(false);
                       }}
@@ -1647,18 +1665,32 @@
 
               {academyTab === 'videos' ? (
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
-                  {VIDEOS.map((v, i) => (
-                    <Card key={i}>
-                      <div style={{background:'linear-gradient(135deg, #1a1f2e, #0d1117)',borderRadius:8,height:160,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12,position:'relative'}}>
-                        <div style={{width:48,height:48,borderRadius:99,background:'rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'}}>
-                          <Play size={20} fill="white" color="white"/>
+                  {VIDEOS.map((v, i) => {
+                    const IconMap = {Code2,Zap,Building2,Camera,Sparkles,Shield,ChevronsRight,MessageSquare};
+                    const ThumbIcon = IconMap[v.thumb.icon] || Code2;
+                    return (
+                    <Card key={i} style={{cursor:'pointer'}} onClick={()=>setVideoModal(v)}>
+                      <div style={{background:v.thumb.bg,borderRadius:8,height:160,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12,position:'relative',overflow:'hidden'}}>
+                        {/* Decorative background elements */}
+                        <div style={{position:'absolute',top:12,left:16,display:'flex',alignItems:'center',gap:6}}>
+                          <span style={{fontSize:18,fontWeight:800,letterSpacing:-1,color:'rgba(255,255,255,0.12)'}}>)))</span>
+                          <span style={{fontSize:10,fontWeight:700,color:v.thumb.accent,textTransform:'uppercase',letterSpacing:'0.1em',opacity:0.8}}>{v.thumb.label}</span>
+                        </div>
+                        <div style={{position:'absolute',bottom:-20,right:-20,opacity:0.06}}>
+                          <ThumbIcon size={120} color="#fff"/>
+                        </div>
+                        <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:100,height:60,borderRadius:8,border:'1px solid rgba(255,255,255,0.1)',background:'rgba(0,0,0,0.3)',backdropFilter:'blur(8px)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                          <div style={{width:36,height:36,borderRadius:99,background:v.thumb.accent+'30',display:'flex',alignItems:'center',justifyContent:'center',border:'2px solid '+v.thumb.accent}}>
+                            <Play size={16} fill={v.thumb.accent} color={v.thumb.accent}/>
+                          </div>
                         </div>
                         <span style={{position:'absolute',bottom:8,right:8,background:'rgba(0,0,0,0.7)',color:'#fff',fontSize:11,padding:'2px 6px',borderRadius:4}}>{v.duration}</span>
                       </div>
                       <h4 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:14,marginBottom:8,lineHeight:1.4}}>{v.title}</h4>
                       <Badge color={v.level==='Beginner'?'#22c55e':v.level==='Intermediate'?'#f59e0b':'#ef4444'}>{v.level}</Badge>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={{display:'flex',flexDirection:'column',gap:2}}>
@@ -1675,6 +1707,44 @@
               )}
             </div>
           </section>
+
+          {/* Video Viewer Modal */}
+          {videoModal && (
+            <Modal onClose={()=>setVideoModal(null)} width={720}>
+              <div style={{padding:0}}>
+                {(() => {
+                  const IconMap = {Code2,Zap,Building2,Camera,Sparkles,Shield,ChevronsRight,MessageSquare};
+                  const ThumbIcon = IconMap[videoModal.thumb.icon] || Code2;
+                  return (
+                    <div style={{background:videoModal.thumb.bg,height:320,display:'flex',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden',borderRadius:'12px 12px 0 0'}}>
+                      <div style={{position:'absolute',top:20,left:24,display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{fontSize:24,fontWeight:800,letterSpacing:-1,color:'rgba(255,255,255,0.15)'}}>)))</span>
+                        <span style={{fontSize:11,fontWeight:700,color:videoModal.thumb.accent,textTransform:'uppercase',letterSpacing:'0.1em'}}>{videoModal.thumb.label}</span>
+                      </div>
+                      <div style={{position:'absolute',bottom:-40,right:-40,opacity:0.06}}>
+                        <ThumbIcon size={200} color="#fff"/>
+                      </div>
+                      <div style={{width:72,height:72,borderRadius:99,background:videoModal.thumb.accent+'30',display:'flex',alignItems:'center',justifyContent:'center',border:'3px solid '+videoModal.thumb.accent,cursor:'pointer'}}>
+                        <Play size={28} fill={videoModal.thumb.accent} color={videoModal.thumb.accent}/>
+                      </div>
+                      <span style={{position:'absolute',bottom:16,right:16,background:'rgba(0,0,0,0.7)',color:'#fff',fontSize:13,padding:'4px 10px',borderRadius:6,fontWeight:600}}>{videoModal.duration}</span>
+                    </div>
+                  );
+                })()}
+                <div style={{padding:28}}>
+                  <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+                    <Badge color={videoModal.level==='Beginner'?'#22c55e':videoModal.level==='Intermediate'?'#f59e0b':'#ef4444'}>{videoModal.level}</Badge>
+                    <span style={{fontSize:13,color:'var(--muted)'}}>{videoModal.duration}</span>
+                  </div>
+                  <h3 style={{fontFamily:'DM Serif Display',fontSize:24,margin:'0 0 16px',lineHeight:1.3}}>{videoModal.title}</h3>
+                  <p style={{color:'var(--muted)',fontSize:14,lineHeight:1.7,margin:'0 0 24px'}}>{videoModal.desc}</p>
+                  <div style={{display:'flex',gap:12}}>
+                    <Btn onClick={()=>setVideoModal(null)}>Close</Btn>
+                  </div>
+                </div>
+              </div>
+            </Modal>
+          )}
 
           {/* ─── PARTNER PORTAL (login/info page) ─── */}
           <section style={{padding:'100px 24px',display:activeSection==='portal'?'block':'none'}}>
