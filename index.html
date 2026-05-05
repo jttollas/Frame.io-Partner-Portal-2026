@@ -2269,7 +2269,7 @@
           </div>
 
           {/* Project Credentials — shown for each selected integration */}
-          {(isAll ? breakdownData : selectedBreakdowns).map(bd => (
+          {!isAll && selectedBreakdowns.map(bd => (
             <Card key={bd.projectId} hover={false}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
                 <h4 style={{fontFamily:'DM Sans',fontWeight:600}}>Project Credentials — {bd.name}</h4>
@@ -2645,7 +2645,7 @@
                 </Card>
 
           {/* C2C Project Credentials — shown for each selected device */}
-          {(isAll ? deviceData.map(d=>d.model) : selectedIds).map(id => {
+          {!isAll && selectedIds.map(id => {
             const dev = deviceData.find(d => d.model === id);
             if (!dev) return null;
             return (
