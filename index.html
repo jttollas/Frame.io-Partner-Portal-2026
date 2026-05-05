@@ -2204,7 +2204,7 @@
             <h4 style={{fontFamily:'DM Sans',fontWeight:600,marginBottom:16}}>API Traffic — {intLabel} — Last 30 Days</h4>
             <div style={{height:280}}>
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={API_TRAFFIC_30D}>
+                <ComposedChart data={API_TRAFFIC_30D.map(d=>({...d, total:Math.round(d.total*drm), errors:Math.round(d.errors*drm)}))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                   <XAxis dataKey="date" stroke="var(--muted)" fontSize={11} interval={4}/>
                   <YAxis stroke="var(--muted)" fontSize={11} tickFormatter={fmt}/>
@@ -2223,7 +2223,7 @@
                     <h4 style={{fontFamily:'DM Sans',fontWeight:600,marginBottom:16}}>Endpoint Usage</h4>
                     <div style={{height:280}}>
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={ENDPOINTS} layout="vertical" margin={{left:100}}>
+                        <BarChart data={ENDPOINTS.map(d=>({...d, calls:Math.round(d.calls*drm)}))} layout="vertical" margin={{left:100}}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                           <XAxis type="number" stroke="var(--muted)" fontSize={11} tickFormatter={fmt}/>
                           <YAxis dataKey="name" type="category" stroke="var(--muted)" fontSize={11} width={100}/>
@@ -2272,7 +2272,7 @@
                     <h4 style={{fontFamily:'DM Sans',fontWeight:600,marginBottom:16}}>API Calls by Action (Monthly)</h4>
                     <div style={{height:240}}>
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={MONTHLY_ACTIONS}>
+                        <BarChart data={MONTHLY_ACTIONS.map(d=>({...d, 'Files.show':Math.round(d['Files.show']*drm), 'Files.create':Math.round(d['Files.create']*drm), 'Folders.index':Math.round(d['Folders.index']*drm), 'Comments.create':Math.round(d['Comments.create']*drm), 'Projects.index':Math.round(d['Projects.index']*drm), 'Assets.list':Math.round(d['Assets.list']*drm), 'Webhooks.index':Math.round(d['Webhooks.index']*drm), 'ReviewLinks.create':Math.round(d['ReviewLinks.create']*drm)}))}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                           <XAxis dataKey="month" stroke="var(--muted)" fontSize={11}/>
                           <YAxis stroke="var(--muted)" fontSize={11} tickFormatter={fmt}/>
@@ -2309,7 +2309,7 @@
                             <td style={{padding:'10px 12px'}}><code style={{fontSize:12,color:'var(--teal)'}}>{w.event}</code></td>
                             <td style={{padding:'10px 12px',maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--muted)'}}>{w.endpoint}</td>
                             <td style={{padding:'10px 12px',color:w.success>=98?'var(--green)':w.success>=96?'var(--amber)':'var(--red)',fontWeight:600}}>{w.success}%</td>
-                            <td style={{padding:'10px 12px'}}>{fmt(w.deliveries)}</td>
+                            <td style={{padding:'10px 12px'}}>{fmt(Math.round(w.deliveries*drm))}</td>
                             <td style={{padding:'10px 12px'}}>{w.latency}ms</td>
                             <td style={{padding:'10px 12px'}}><StatusBadge status={w.status}/></td>
                           </tr>
@@ -2345,24 +2345,24 @@
                               <div style={{width:80,height:6,background:'var(--border)',borderRadius:3,overflow:'hidden'}}>
                                 <div style={{width:`${(d.apiCalls/maxCalls)*100}%`,height:'100%',background:'var(--accent)',borderRadius:3}}/>
                               </div>
-                              {fmt(d.apiCalls)}
+                              {fmt(Math.round(d.apiCalls*drm))}
                             </div>
                           </td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.assets)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.comments)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.shares)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.webhookDeliveries)}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.assets*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.comments*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.shares*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.webhookDeliveries*drm))}</td>
                           <td style={{padding:'8px 12px',color:d.errorRate<=1?'var(--green)':d.errorRate<=1.5?'var(--amber)':'var(--red)',fontWeight:600}}>{d.errorRate}%</td>
                           <td style={{padding:'8px 12px'}}>{d.avgLatency}ms</td>
                         </tr>
                       ))}
                       <tr style={{borderTop:'2px solid var(--border)',fontWeight:700}}>
                         <td style={{padding:'8px 12px'}}>Totals</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredIntegrations.reduce((a,d)=>a+d.apiCalls,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredIntegrations.reduce((a,d)=>a+d.assets,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredIntegrations.reduce((a,d)=>a+d.comments,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredIntegrations.reduce((a,d)=>a+d.shares,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredIntegrations.reduce((a,d)=>a+d.webhookDeliveries,0))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredIntegrations.reduce((a,d)=>a+d.apiCalls,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredIntegrations.reduce((a,d)=>a+d.assets,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredIntegrations.reduce((a,d)=>a+d.comments,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredIntegrations.reduce((a,d)=>a+d.shares,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredIntegrations.reduce((a,d)=>a+d.webhookDeliveries,0)*drm))}</td>
                         <td style={{padding:'8px 12px'}}>{(filteredIntegrations.reduce((a,d)=>a+d.errorRate,0)/filteredIntegrations.length).toFixed(1)}%</td>
                         <td style={{padding:'8px 12px'}}>{Math.round(filteredIntegrations.reduce((a,d)=>a+d.avgLatency,0)/filteredIntegrations.length)}ms</td>
                       </tr>
@@ -2388,7 +2388,7 @@
                   {PLATFORM_USERS_BY_ACCOUNT.map(r => (
                     <tr key={r.type} style={{borderBottom:'1px solid var(--border)'}}>
                       <td style={{padding:'8px 12px',fontWeight:500}}>{r.type}</td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.users)}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.users*drm))}</td>
                       <td style={{padding:'8px 12px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:8}}>
                           <div style={{flex:1,height:6,background:'var(--surface2)',borderRadius:3,maxWidth:100}}>
@@ -2397,16 +2397,16 @@
                           <span>{r.pctTotal}%</span>
                         </div>
                       </td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.apiCalls)}</td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.avgCalls)}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.apiCalls*drm))}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.avgCalls*drm))}</td>
                     </tr>
                   ))}
                   <tr style={{borderTop:'2px solid var(--border)',fontWeight:700}}>
                     <td style={{padding:'8px 12px'}}>Total</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.users,0))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.users,0)*drm))}</td>
                     <td style={{padding:'8px 12px'}}>100%</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.apiCalls,0))}</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.apiCalls,0)/PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.users,0)))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.apiCalls,0)*drm))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.apiCalls,0)/PLATFORM_USERS_BY_ACCOUNT.reduce((a,r)=>a+r.users,0)*drm))}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2419,8 +2419,8 @@
               <div style={{height:200}}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={[
-                    {day:'Mon',sessions:842},{day:'Tue',sessions:1024},{day:'Wed',sessions:967},
-                    {day:'Thu',sessions:1189},{day:'Fri',sessions:1092},{day:'Sat',sessions:634},{day:'Sun',sessions:521}
+                    {day:'Mon',sessions:Math.round(842*drm)},{day:'Tue',sessions:Math.round(1024*drm)},{day:'Wed',sessions:Math.round(967*drm)},
+                    {day:'Thu',sessions:Math.round(1189*drm)},{day:'Fri',sessions:Math.round(1092*drm)},{day:'Sat',sessions:Math.round(634*drm)},{day:'Sun',sessions:Math.round(521*drm)}
                   ]}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                     <XAxis dataKey="day" stroke="var(--muted)" fontSize={11}/>
@@ -2431,7 +2431,7 @@
                 </ResponsiveContainer>
               </div>
               <div style={{textAlign:'center',marginTop:8}}>
-                <p style={{fontSize:20,fontWeight:700}}>1,189 <span style={{fontSize:13,color:'var(--muted)',fontWeight:400}}>peak sessions today</span></p>
+                <p style={{fontSize:20,fontWeight:700}}>{fmt(Math.round(1189*drm))} <span style={{fontSize:13,color:'var(--muted)',fontWeight:400}}>peak sessions today</span></p>
               </div>
             </Card>
             <Card hover={false}>
@@ -2572,7 +2572,7 @@
                 <h4 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:13,marginBottom:12}}>{ch.title}</h4>
                 <div style={{height:200}}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={ch.data}>
+                    <ComposedChart data={ch.data.map(d=>({...d, [ch.runKey]:Math.round(d[ch.runKey]*drm), [ch.newKey]:Math.round(d[ch.newKey]*drm)}))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                       <XAxis dataKey="month" stroke="var(--muted)" fontSize={10}/>
                       <YAxis stroke="var(--muted)" fontSize={10} tickFormatter={fmt}/>
@@ -2609,29 +2609,29 @@
                       {filteredDevices.map((d,i) => (
                         <tr key={i} style={{borderBottom:'1px solid var(--border)'}}>
                           <td style={{padding:'8px 12px',fontWeight:500}}>{d.model}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.accounts)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.devices)}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.accounts*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.devices*drm))}</td>
                           <td style={{padding:'8px 12px'}}>
                             <div style={{display:'flex',alignItems:'center',gap:8}}>
                               <div style={{width:80,height:6,background:'var(--border)',borderRadius:3,overflow:'hidden'}}>
                                 <div style={{width:`${(d.assets/maxAssets)*100}%`,height:'100%',background:'var(--accent)',borderRadius:3}}/>
                               </div>
-                              {fmt(d.assets)}
+                              {fmt(Math.round(d.assets*drm))}
                             </div>
                           </td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.runtime)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.storage)}</td>
-                          <td style={{padding:'8px 12px'}}>{fmt(d.lightroom)}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.runtime*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.storage*drm))}</td>
+                          <td style={{padding:'8px 12px'}}>{fmt(Math.round(d.lightroom*drm))}</td>
                         </tr>
                       ))}
                       <tr style={{borderTop:'2px solid var(--border)',fontWeight:700}}>
                         <td style={{padding:'8px 12px'}}>Totals</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.accounts,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.devices,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.assets,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.runtime,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.storage,0))}</td>
-                        <td style={{padding:'8px 12px'}}>{fmt(filteredDevices.reduce((a,d)=>a+d.lightroom,0))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.accounts,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.devices,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.assets,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.runtime,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.storage,0)*drm))}</td>
+                        <td style={{padding:'8px 12px'}}>{fmt(Math.round(filteredDevices.reduce((a,d)=>a+d.lightroom,0)*drm))}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -2655,7 +2655,7 @@
                   {C2C_ACCOUNTS_BY_TYPE.map(r => (
                     <tr key={r.type} style={{borderBottom:'1px solid var(--border)'}}>
                       <td style={{padding:'8px 12px',fontWeight:500}}>{r.type}</td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.accounts)}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.accounts*drm))}</td>
                       <td style={{padding:'8px 12px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:8}}>
                           <div style={{flex:1,height:6,background:'var(--surface2)',borderRadius:3,maxWidth:100}}>
@@ -2664,16 +2664,16 @@
                           <span>{r.pctTotal}%</span>
                         </div>
                       </td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.devices)}</td>
-                      <td style={{padding:'8px 12px'}}>{fmt(r.assets)}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.devices*drm))}</td>
+                      <td style={{padding:'8px 12px'}}>{fmt(Math.round(r.assets*drm))}</td>
                     </tr>
                   ))}
                   <tr style={{borderTop:'2px solid var(--border)',fontWeight:700}}>
                     <td style={{padding:'8px 12px'}}>Total</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.accounts,0))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.accounts,0)*drm))}</td>
                     <td style={{padding:'8px 12px'}}>100%</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.devices,0))}</td>
-                    <td style={{padding:'8px 12px'}}>{fmt(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.assets,0))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.devices,0)*drm))}</td>
+                    <td style={{padding:'8px 12px'}}>{fmt(Math.round(C2C_ACCOUNTS_BY_TYPE.reduce((a,r)=>a+r.assets,0)*drm))}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2685,7 +2685,7 @@
               <h4 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:13,marginBottom:12}}>Filesize Buckets</h4>
               <div style={{height:240}}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={FILESIZE_BUCKETS} layout="vertical" margin={{left:60}}>
+                  <BarChart data={FILESIZE_BUCKETS.map(d=>({...d, value:Math.round(d.value*drm)}))} layout="vertical" margin={{left:60}}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                     <XAxis type="number" stroke="var(--muted)" fontSize={10} tickFormatter={fmt}/>
                     <YAxis dataKey="name" type="category" stroke="var(--muted)" fontSize={10} width={60}/>
@@ -2736,7 +2736,7 @@
             <h4 style={{fontFamily:'DM Sans',fontWeight:600,marginBottom:16}}>Codec/Resolution Breakdown</h4>
             <div style={{height:300}}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={CODEC_RESOLUTION} layout="vertical" margin={{left:100}}>
+                <BarChart data={CODEC_RESOLUTION.map(d=>({...d, assets:Math.round(d.assets*drm)}))} layout="vertical" margin={{left:100}}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                   <XAxis type="number" stroke="var(--muted)" fontSize={11} tickFormatter={fmt}/>
                   <YAxis dataKey="codec" type="category" stroke="var(--muted)" fontSize={11} width={100}/>
@@ -2760,7 +2760,7 @@
                 <h4 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:13,marginBottom:12}}>{ch.title}</h4>
                 <div style={{height:180}}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={CUMULATIVE_TOTALS}>
+                    <AreaChart data={CUMULATIVE_TOTALS.map(d=>({...d, accounts:Math.round(d.accounts*drm), devices:Math.round(d.devices*drm), projects:Math.round(d.projects*drm)}))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                       <XAxis dataKey="month" stroke="var(--muted)" fontSize={10}/>
                       <YAxis stroke="var(--muted)" fontSize={10} tickFormatter={fmt}/>
@@ -2788,7 +2788,7 @@
                 <h5 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:12,marginBottom:8,color:'var(--muted)'}}>{ch.title}</h5>
                 <div style={{height:160}}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={C2C_ASSETS_CHARTS}>
+                    <ComposedChart data={C2C_ASSETS_CHARTS.map(d=>{const o={...d};if(!ch.isPercent){o[ch.barKey]=Math.round(d[ch.barKey]*drm);if(ch.lineKey)o[ch.lineKey]=Math.round(d[ch.lineKey]*drm);}return o;})}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)"/>
                       <XAxis dataKey="month" stroke="var(--muted)" fontSize={9}/>
                       <YAxis stroke="var(--muted)" fontSize={9} tickFormatter={ch.isPercent ? v=>v+'%' : fmt} domain={ch.isPercent ? [90,100] : undefined}/>
@@ -2823,22 +2823,22 @@
                   {FILE_TYPES.map((f,i) => (
                     <tr key={i} style={{borderBottom:'1px solid var(--border)'}}>
                       <td style={{padding:'6px 10px'}}><code style={{color:'var(--teal)',fontSize:11}}>{f.type}</code></td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.failAssets)}</td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.failRuntime)}</td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.failGB)}</td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.successAssets)}</td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.successRuntime)}</td>
-                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(f.successGB)}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.failAssets*drm))}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.failRuntime*drm))}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.failGB*drm))}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.successAssets*drm))}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.successRuntime*drm))}</td>
+                      <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(f.successGB*drm))}</td>
                     </tr>
                   ))}
                   <tr style={{fontWeight:700,borderTop:'2px solid var(--border)'}}>
                     <td style={{padding:'6px 10px'}}>Totals</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.failAssets,0))}</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.failRuntime,0))}</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.failGB,0))}</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.successAssets,0))}</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.successRuntime,0))}</td>
-                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(FILE_TYPES.reduce((a,f)=>a+f.successGB,0))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.failAssets,0)*drm))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.failRuntime,0)*drm))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.failGB,0)*drm))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.successAssets,0)*drm))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.successRuntime,0)*drm))}</td>
+                    <td style={{padding:'6px 10px',textAlign:'right'}}>{fmt(Math.round(FILE_TYPES.reduce((a,f)=>a+f.successGB,0)*drm))}</td>
                   </tr>
                 </tbody>
               </table>
