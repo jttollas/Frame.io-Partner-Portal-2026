@@ -596,6 +596,9 @@
 
       // Partner Application
       const [partnerModal, setPartnerModal] = useState(null); // 'platform' | 'c2c'
+      const [showC2CRequestModal, setShowC2CRequestModal] = useState(false);
+      const [c2cRequestForm, setC2CRequestForm] = useState({firstName:'Jeremy',lastName:'Tollas',company:'Adobe',email:'jtollas@adobe.com',integrationName:'',description:''});
+      const [c2cRequestSubmitted, setC2CRequestSubmitted] = useState(false);
       const [partnerStep, setPartnerStep] = useState(1);
       const [partnerForm, setPartnerForm] = useState({});
       const [partnerSubmitted, setPartnerSubmitted] = useState(false);
@@ -721,7 +724,16 @@
                       );
                     })}
                     <div style={{borderTop:'1px solid var(--border)',margin:'4px 0'}}/>
-                    <button onClick={()=>{setProjectDropdownOpen(false);setShowCreateProject(true);setCreateStep(1);setNewProject(p=>({...p,type:dashTab==='c2c'?'c2c':'platform',authType:'',name:''}));}}
+                    <button onClick={()=>{
+                      setProjectDropdownOpen(false);
+                      if (dashTab==='c2c') {
+                        setC2CRequestSubmitted(false);
+                        setC2CRequestForm({firstName:'Jeremy',lastName:'Tollas',company:'Adobe',email:'jtollas@adobe.com',integrationName:'',description:''});
+                        setShowC2CRequestModal(true);
+                      } else {
+                        setShowCreateProject(true);setCreateStep(1);setNewProject(p=>({...p,type:'platform',authType:'',name:''}));
+                      }
+                    }}
                       style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'8px 12px',background:'none',border:'none',color:'var(--green)',borderRadius:6,cursor:'pointer',textAlign:'left',fontSize:13}}
                       onMouseEnter={e=>e.currentTarget.style.background='var(--surface2)'}
                       onMouseLeave={e=>e.currentTarget.style.background='none'}>
@@ -1046,6 +1058,97 @@
                       (createStep===1 && !newProject.name.trim()) ||
                       (createStep===3 && !newProject.authType)
                     }>{createStep===4&&newProject.authType==='s2s'?'Save configured API':'Next'} <ArrowRight size={16}/></Btn>
+                  </div>
+                )}
+              </div>
+            </Modal>
+          )}
+
+          {/* C2C Client Secret Request Modal */}
+          {showC2CRequestModal && (
+            <Modal onClose={()=>setShowC2CRequestModal(false)} width={560}>
+              <div style={{padding:32}}>
+                {!c2cRequestSubmitted ? (
+                  <div>
+                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:'linear-gradient(135deg, #0bc5ea 0%, #3b82f6 100%)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                        <Key size={20} color="#fff"/>
+                      </div>
+                      <div>
+                        <h3 style={{fontFamily:'DM Serif Display',fontSize:20,margin:0}}>Request C2C Client Secret</h3>
+                        <p style={{color:'var(--muted)',fontSize:12,margin:0}}>Submit a request to the Frame.io Partnerships team</p>
+                      </div>
+                    </div>
+
+                    <div style={{background:'var(--surface2)',borderRadius:8,padding:12,marginBottom:24,marginTop:16,border:'1px solid var(--border)'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+                        <Info size={14} style={{color:'var(--accent)'}}/>
+                        <span style={{fontSize:12,fontWeight:600,color:'var(--accent)'}}>How it works</span>
+                      </div>
+                      <p style={{fontSize:12,color:'var(--muted)',margin:0,lineHeight:1.5}}>C2C integrations require an approved partnership. Your request will be reviewed by the Partnerships team, and you'll receive your client credentials via email once approved.</p>
+                    </div>
+
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>First Name</label>
+                        <input value={c2cRequestForm.firstName} onChange={e=>setC2CRequestForm(f=>({...f,firstName:e.target.value}))}
+                          style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Last Name</label>
+                        <input value={c2cRequestForm.lastName} onChange={e=>setC2CRequestForm(f=>({...f,lastName:e.target.value}))}
+                          style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                      </div>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Company Name</label>
+                        <input value={c2cRequestForm.company} onChange={e=>setC2CRequestForm(f=>({...f,company:e.target.value}))}
+                          style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Requestor Email</label>
+                        <input value={c2cRequestForm.email} onChange={e=>setC2CRequestForm(f=>({...f,email:e.target.value}))}
+                          style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                      </div>
+                    </div>
+                    <div style={{marginBottom:16}}>
+                      <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Integration Name *</label>
+                      <input value={c2cRequestForm.integrationName} onChange={e=>setC2CRequestForm(f=>({...f,integrationName:e.target.value}))} placeholder="e.g. Acme Camera C2C Upload"
+                        style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+                    </div>
+                    <div style={{marginBottom:24}}>
+                      <label style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.05em',display:'block',marginBottom:6}}>Integration Description *</label>
+                      <textarea value={c2cRequestForm.description} onChange={e=>setC2CRequestForm(f=>({...f,description:e.target.value}))} placeholder="Briefly describe your C2C integration, target devices, and expected upload volume..."
+                        rows={4} style={{width:'100%',padding:'10px 12px',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:13,outline:'none',resize:'vertical',fontFamily:'DM Sans',boxSizing:'border-box'}}/>
+                    </div>
+
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <Btn variant="ghost" onClick={()=>setShowC2CRequestModal(false)}>Cancel</Btn>
+                      <Btn disabled={!c2cRequestForm.integrationName.trim()||!c2cRequestForm.description.trim()} onClick={()=>setC2CRequestSubmitted(true)}>Submit Request</Btn>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{textAlign:'center',padding:'16px 0'}}>
+                    <div style={{width:56,height:56,borderRadius:99,background:'rgba(34,197,94,0.15)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+                      <CheckCircle size={28} style={{color:'var(--green)'}}/>
+                    </div>
+                    <h3 style={{fontFamily:'DM Serif Display',fontSize:22,margin:'0 0 8px'}}>Request Submitted</h3>
+                    <p style={{color:'var(--muted)',fontSize:14,maxWidth:380,margin:'0 auto 24px'}}>Your C2C client secret request has been sent to the Frame.io Partnerships team. You'll receive your credentials at <strong style={{color:'var(--text)'}}>{c2cRequestForm.email}</strong> once approved.</p>
+                    <div style={{background:'var(--surface2)',borderRadius:10,padding:20,textAlign:'left',maxWidth:400,margin:'0 auto 24px'}}>
+                      {[
+                        ['Integration',c2cRequestForm.integrationName],
+                        ['Requestor',c2cRequestForm.firstName+' '+c2cRequestForm.lastName],
+                        ['Company',c2cRequestForm.company],
+                        ['Email',c2cRequestForm.email],
+                      ].map(([k,v])=>(
+                        <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid var(--border)'}}>
+                          <span style={{color:'var(--muted)',fontSize:13}}>{k}</span>
+                          <span style={{fontSize:13,fontWeight:500}}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Btn onClick={()=>setShowC2CRequestModal(false)}>Done</Btn>
                   </div>
                 )}
               </div>
