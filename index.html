@@ -622,6 +622,17 @@
       const [createStep, setCreateStep] = useState(1);
       const [newProject, setNewProject] = useState({name:'',env:'Production',type:'platform',authType:'',oauthType:'webapp',redirectUri:'',redirectPattern:'',scopes:['openid','offline_access','email','profile','additional_info.roles']});
       const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+      const dropdownRef = useRef(null);
+      useEffect(() => {
+        if (!projectDropdownOpen) return;
+        const handler = (e) => {
+          if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            setProjectDropdownOpen(false);
+          }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+      }, [projectDropdownOpen]);
       const [showSecret, setShowSecret] = useState(false);
       const [showC2CSecret, setShowC2CSecret] = useState(false);
       const [rotateModal, setRotateModal] = useState(false);
@@ -682,7 +693,7 @@
             <div style={{display:'flex',alignItems:'center',gap:16}}>
               <span style={{fontSize:24,fontWeight:800,letterSpacing:-1,background:'linear-gradient(135deg,#4b8ef7,#0bc5ea)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>)))</span>
               <span style={{fontWeight:600,color:'var(--text)',fontSize:15}}>Frame.io Console</span>
-              <div style={{position:'relative',marginLeft:12}}>
+              <div ref={dropdownRef} style={{position:'relative',marginLeft:12}}>
                 <button onClick={()=>setProjectDropdownOpen(!projectDropdownOpen)}
                   style={{background:'var(--surface)',color:'var(--text)',border:'1px solid var(--border)',borderRadius:8,padding:'6px 12px',fontSize:13,display:'flex',alignItems:'center',gap:8,cursor:'pointer',minWidth:220}}>
                   <span style={{flex:1,textAlign:'left'}}>{selectedLabel}</span>
