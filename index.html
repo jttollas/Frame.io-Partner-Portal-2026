@@ -150,18 +150,18 @@
     // ─── MOCK DATA ─────────────────────────────────────────────────────
 
     const INTEGRATIONS = [
-      { id: 1, name: "Integration 1", cat: "PM", tier: "Premier", desc: "Streamline project management by syncing tasks and approvals with Frame.io", icon: "I1", color: "#f97316" },
-      { id: 2, name: "Integration 2", cat: "Connection", tier: "Partner", desc: "Push real-time notifications for Frame.io events to your messaging platform", icon: "I2", color: "#8b5cf6" },
-      { id: 3, name: "Integration 3", cat: "DAM", tier: "Partner", desc: "Automatically sync and proof assets between your storage platform and Frame.io", icon: "I3", color: "#06b6d4" },
-      { id: 4, name: "Integration 4", cat: "PM", tier: "Partner", desc: "Two-way task sync keeps your project boards up-to-date with Frame.io activity", icon: "I4", color: "#ec4899" },
-      { id: 5, name: "Integration 5", cat: "Design", tier: "Premier", desc: "Embed Frame.io review and approval tools directly into your design environment", icon: "I5", color: "#a855f7" },
-      { id: 6, name: "Integration 6", cat: "PM", tier: "Partner", desc: "Connect your issue tracker to Frame.io for seamless creative project delivery", icon: "I6", color: "#3b82f6" },
-      { id: 7, name: "Integration 7", cat: "Connection", tier: "Developer", desc: "Keep remote teams aligned with real-time Frame.io status updates", icon: "I7", color: "#14b8a6" },
-      { id: 8, name: "Integration 8", cat: "PM", tier: "Developer", desc: "Automatically update work items when Frame.io assets change status", icon: "I8", color: "#f43f5e" },
-      { id: 9, name: "Integration 9", cat: "C2C", tier: "Premier", desc: "Direct wireless upload from cinema cameras to Frame.io projects", icon: "I9", color: "#eab308" },
-      { id: 10, name: "Integration 10", cat: "C2C", tier: "Premier", desc: "Stream footage directly from professional video cameras to Frame.io", icon: "I10", color: "#22c55e" },
-      { id: 11, name: "Integration 11", cat: "C2C", tier: "Partner", desc: "Wireless upload support for cinema-grade camera systems", icon: "I11", color: "#0ea5e9" },
-      { id: 12, name: "Integration 12", cat: "C2C", tier: "Partner", desc: "Direct upload support for mirrorless and cinema camera systems", icon: "I12", color: "#d946ef" },
+      { id: 1, name: "Integration 1", cat: "PM", certified: true, featured: true, desc: "Streamline project management by syncing tasks and approvals with Frame.io", icon: "I1", color: "#f97316" },
+      { id: 2, name: "Integration 2", cat: "Connection", certified: false, featured: false, desc: "Push real-time notifications for Frame.io events to your messaging platform", icon: "I2", color: "#8b5cf6" },
+      { id: 3, name: "Integration 3", cat: "DAM", certified: true, featured: true, desc: "Automatically sync and proof assets between your storage platform and Frame.io", icon: "I3", color: "#06b6d4" },
+      { id: 4, name: "Integration 4", cat: "PM", certified: false, featured: false, desc: "Two-way task sync keeps your project boards up-to-date with Frame.io activity", icon: "I4", color: "#ec4899" },
+      { id: 5, name: "Integration 5", cat: "Design", certified: true, featured: true, desc: "Embed Frame.io review and approval tools directly into your design environment", icon: "I5", color: "#a855f7" },
+      { id: 6, name: "Integration 6", cat: "PM", certified: false, featured: false, desc: "Connect your issue tracker to Frame.io for seamless creative project delivery", icon: "I6", color: "#3b82f6" },
+      { id: 7, name: "Integration 7", cat: "Connection", certified: false, featured: false, desc: "Keep remote teams aligned with real-time Frame.io status updates", icon: "I7", color: "#14b8a6" },
+      { id: 8, name: "Integration 8", cat: "PM", certified: false, featured: false, desc: "Automatically update work items when Frame.io assets change status", icon: "I8", color: "#f43f5e" },
+      { id: 9, name: "Integration 9", cat: "C2C", certified: true, featured: true, desc: "Direct wireless upload from cinema cameras to Frame.io projects", icon: "I9", color: "#eab308" },
+      { id: 10, name: "Integration 10", cat: "C2C", certified: true, featured: true, desc: "Stream footage directly from professional video cameras to Frame.io", icon: "I10", color: "#22c55e" },
+      { id: 11, name: "Integration 11", cat: "C2C", certified: false, featured: false, desc: "Wireless upload support for cinema-grade camera systems", icon: "I11", color: "#0ea5e9" },
+      { id: 12, name: "Integration 12", cat: "C2C", certified: false, featured: false, desc: "Direct upload support for mirrorless and cinema camera systems", icon: "I12", color: "#d946ef" },
     ];
 
     const VIDEOS = [
@@ -444,9 +444,9 @@
       }}>{children}</span>
     );
 
-    const TierBadge = ({tier}) => {
-      const c = tier==='Premier' ? '#eab308' : tier==='Partner' ? '#3b82f6' : '#6b7280';
-      return <Badge color={c}>{tier === 'Premier' && '★ '}{tier}</Badge>;
+    const TierBadge = ({certified}) => {
+      if (!certified) return null;
+      return <Badge color="#22c55e">✓ Certified</Badge>;
     };
 
     const StatusBadge = ({status}) => {
@@ -608,7 +608,7 @@
       const [newsletterEmail, setNewsletterEmail] = useState('');
 
       // Marketplace
-      const [marketFilter, setMarketFilter] = useState('All');
+      const [marketFilter, setMarketFilter] = useState('Featured');
       const [marketSearch, setMarketSearch] = useState('');
       const [integrationModal, setIntegrationModal] = useState(null);
       const [integrationTab, setIntegrationTab] = useState('overview');
@@ -739,7 +739,9 @@
 
       const filteredIntegrations = useMemo(() => {
         let items = INTEGRATIONS;
-        if (marketFilter !== 'All') items = items.filter(i => i.cat === marketFilter);
+        if (marketFilter === 'Featured') items = items.filter(i => i.featured);
+        else if (marketFilter === 'Certified') items = items.filter(i => i.certified);
+        else if (marketFilter !== 'All') items = items.filter(i => i.cat === marketFilter);
         if (marketSearch) items = items.filter(i => i.name.toLowerCase().includes(marketSearch.toLowerCase()) || i.desc.toLowerCase().includes(marketSearch.toLowerCase()));
         return items;
       }, [marketFilter, marketSearch]);
@@ -815,7 +817,7 @@
                   setC2CRequestForm({firstName:'Jeremy',lastName:'Tollas',company:'Adobe',email:'jtollas@adobe.com',integrationName:'',description:''});
                   setShowC2CRequestModal(true);
                 } else {
-                  setShowCreateProject(true);setCreateStep(1);setNewProject(p=>({...p,type:'platform',authType:'',apiChoice:'adc',name:''}));
+                  setShowCreateProject(true);setCreateStep(1);setTokenScopes({});setNewProject({name:'',env:'Production',type:'platform',authType:'',apiChoice:'adc',oauthType:'webapp',redirectUri:'',redirectPattern:'',scopes:['openid','offline_access','email','profile','additional_info.roles']});
                 }
               }}
                 style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',background:'var(--green)',color:'#fff',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',transition:'all 0.2s'}}
@@ -1403,7 +1405,7 @@
                 </button>
                 {devToolsOpen==='resources' && (
                   <div style={{position:'absolute',top:'100%',left:0,marginTop:8,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:4,minWidth:200,boxShadow:'0 8px 32px rgba(0,0,0,0.5)',zIndex:60,animation:'slideDown 0.15s cubic-bezier(0.25, 1, 0.5, 1)'}}>
-                    {[['partners','Partner Program'],['integrations','Integrations'],['academy','Developer Academy'],['newsletter','Developer Newsletter'],['kb','Knowledge Base']].map(([key,label]) => (
+                    {[['partners','Partner Program'],['integrations','Connections'],['academy','Developer Academy'],['newsletter','Developer Newsletter'],['kb','Knowledge Base']].map(([key,label]) => (
                       <button key={key} onClick={()=>{
                         if(key==='kb'){window.open('https://help.frame.io/en/','_blank');}
                         else if(key==='newsletter'){setNewsletterModal(true);}
@@ -1582,17 +1584,13 @@
           <section id="docs" style={{padding:'80px 24px',display:activeSection==='integrations'?'block':'none'}}>
             <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:48}}>
-                <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'5px 14px',borderRadius:99,border:'1px solid rgba(11,197,234,0.15)',background:'rgba(11,197,234,0.05)',marginBottom:16}}>
-                  <Zap size={14} color="var(--teal)"/>
-                  <span style={{fontSize:12,fontWeight:600,color:'var(--teal)',textTransform:'uppercase',letterSpacing:'0.08em'}}>Marketplace</span>
-                </div>
-                <h2 style={{fontSize:'clamp(32px, 4vw, 48px)',marginBottom:14,letterSpacing:'-1px'}}>Integrations</h2>
+                <h2 style={{fontSize:'clamp(32px, 4vw, 48px)',marginBottom:14,letterSpacing:'-1px'}}>Connections</h2>
                 <p style={{color:'var(--muted)',fontSize:18,lineHeight:1.6}}>Explore powerful apps built for Frame.io</p>
               </div>
 
               <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:24,flexWrap:'wrap'}}>
                 <div style={{display:'flex',gap:2,background:'var(--surface)',borderRadius:10,border:'1px solid var(--border)',overflow:'hidden'}}>
-                  {['All','PM','DAM','Connection','Design','C2C'].map(cat => (
+                  {['Featured','All','PM','DAM','Design','C2C'].map(cat => (
                     <button key={cat} onClick={()=>setMarketFilter(cat)} style={{
                       padding:'8px 16px',fontSize:13,fontWeight:600,border:'none',cursor:'pointer',transition:'all 0.2s',
                       background:marketFilter===cat?'var(--accent)':'transparent',
@@ -1616,7 +1614,7 @@
                       <div style={{width:44,height:44,borderRadius:10,background:intg.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:700,color:'#fff'}}>
                         {intg.icon}
                       </div>
-                      <TierBadge tier={intg.tier}/>
+                      <TierBadge certified={intg.certified}/>
                     </div>
                     <h4 style={{fontFamily:'DM Sans',fontWeight:600,fontSize:16,marginBottom:6}}>{intg.name}</h4>
                     <p style={{fontSize:13,color:'var(--muted)',lineHeight:1.5,marginBottom:12}}>{intg.desc}</p>
@@ -2024,7 +2022,7 @@
                   <div>
                     <div style={{display:'flex',alignItems:'center',gap:8}}>
                       <h3 style={{fontFamily:'DM Sans',fontWeight:700,fontSize:22}}>{integrationModal.name}</h3>
-                      <TierBadge tier={integrationModal.tier}/>
+                      <TierBadge certified={integrationModal.certified}/>
                     </div>
                     <Badge>{integrationModal.cat}</Badge>
                   </div>
@@ -2945,7 +2943,7 @@
                   <span>Integration Status: <Badge color="var(--green)">Active</Badge></span>
                 </div>
                 <div style={{marginTop:16}}>
-                  <Btn variant="danger" size="sm" onClick={()=>setRotateModal(true)} icon={RotateCcw}>Request New Client Secret</Btn>
+                  <Btn variant="danger" size="sm" onClick={()=>{setRotateReason('');setRotateModal(true);}} icon={RotateCcw}>Request New Client Secret</Btn>
                 </div>
               </Card>
             );
